@@ -86,11 +86,9 @@ class FConvMod(nn.Module):
         B, C, H, W = x.shape
         N = H * W
         shortcut = x
-        my_draw_features(x.cpu().numpy(),"{}/before_fma.png".format(savepath))
         pos_embed = self.CPE(x)
         x = self.norm(x)
         a = self.a(x)
-        show_feature_map_every_channel(a.cpu().numpy(),"{}/sfi.png".format(savepath))
         v = self.v(x)
         a = rearrange(a, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
         v = rearrange(v, 'b (head c) h w -> b head c (h w)', head=self.num_heads)
@@ -104,11 +102,9 @@ class FConvMod(nn.Module):
         x = torch.cat(attns, dim=-1)
         x = F.softmax(x, dim=-1)
         x = rearrange(x, 'b head c (h w) -> b (head c) h w', head=self.num_heads, h=H, w=W)
-        my_draw_features(x.cpu().numpy(),"{}/after_fma.png".format(savepath))
         x = x + pos_embed
         x = self.proj(x)
         out = x + shortcut
-        my_draw_features(x.cpu().numpy(),"{}/attend.png".format(savepath))
         
         return out
 
